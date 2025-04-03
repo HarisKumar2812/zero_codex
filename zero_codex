@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .section {
+            display: none;
+            text-align: center;
+        }
+        .section.active {
+            display: block;
+        }
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .section h2 {
+            color: #7FFF00; /* Parrot Green */
+        }
+        button, input[type="submit"], a {
+            background-color: #7FFF00; /* Parrot Green */
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        button:hover, input[type="submit"]:hover, a:hover {
+            background-color: #5fbf00; /* Slightly darker green for hover effect */
+        }
+        form {
+            margin-top: 20px;
+        }
+        .toggle-password {
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .logout-button {
+            margin-top: 20px;
+        }
+        .error-message {
+            color: red;
+        }
+    </style>
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function storeRegistrationDetails() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const dob = document.getElementById('dob').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+
+            // Check if the username already exists
+            if (localStorage.getItem(username)) {
+                document.getElementById('error-message').textContent = 'Username already exists. Please choose another username.';
+                return;
+            } else {
+                document.getElementById('error-message').textContent = ''; // Clear any previous error messages
+            }
+
+            // Store the registration details in localStorage
+            const userData = {
+                username,
+                password,
+                name,
+                age,
+                dob,
+                phone,
+                address
+            };
+            localStorage.setItem(username, JSON.stringify(userData));
+
+            // Clear the registration form
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('dob').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('address').value = '';
+
+            alert('Registration successful! Please log in.');
+            showSection('login');
+        }
+
+        function storeLoginDetails() {
+            const username = document.getElementById('username_login').value;
+            const password = document.getElementById('password_login').value;
+
+            // Retrieve the stored data from localStorage
+            const storedData = localStorage.getItem(username);
+            if (storedData) {
+                const userData = JSON.parse(storedData);
+                if (password === userData.password) {
+                    // Populate the profile page with stored details
+                    document.getElementById('profile_username').textContent = userData.username;
+                    document.getElementById('profile_name').textContent = userData.name;
+                    document.getElementById('profile_age').textContent = userData.age;
+                    document.getElementById('profile_dob').textContent = userData.dob;
+                    document.getElementById('profile_phone').textContent = userData.phone;
+                    document.getElementById('profile_address').textContent = userData.address;
+
+                    // Clear the login form fields
+                    document.getElementById('username_login').value = '';
+                    document.getElementById('password_login').value = '';
+
+                    // Show the profile section
+                    showSection('profile');
+                } else {
+                    alert('Invalid username or password. Please try again.');
+                }
+            } else {
+                alert('User not found. Please register first.');
+            }
+        }
+
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '👁️‍🗨️';  // Crossed-eye emoji for "hide"
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️';  // Eye emoji for "show"
+            }
+        }
+
+        function logout() {
+            alert('You have been logged out.');
+            showSection('login');
+        }
+
+        window.onload = function() {
+            showSection('register');
+        }
+    </script>
+</head>
+<body>
+    <!-- Register Page -->
+    <div id="register" class="section active">
+        <button class="back-button" onclick="showSection('login')">Back</button>
+        <h2>Register</h2>
+        <form onsubmit="storeRegistrationDetails(); return false;">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required><br><br>
+
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required>
+            <span id="toggle-password-register" class="toggle-password" onclick="togglePasswordVisibility('password', 'toggle-password-register')">👁️</span>
+            <br><br>
+
+            <label for="name">Full Name:</label><br>
+            <input type="text" id="name" name="name" required><br><br>
+
+            <label for="age">Age:</label><br>
+            <input type="number" id="age" name="age" required><br><br>
+
+            <label for="dob">Date of Birth:</label><br>
+            <input type="date" id="dob" name="dob" required><br><br>
+
+            <label for="phone">Phone Number:</label><br>
+            <input type="tel" id="phone" name="phone" required><br><br>
+
+            <label for="address">Address:</label><br>
+            <input type="text" id="address" name="address" required><br><br>
+
+            <input type="submit" value="Register">
+        </form>
+        <br>
+        <span id="error-message" class="error-message"></span>
+        <br>
+        <button onclick="showSection('forgot_password')">Forgot Password?</button>
+        <br><br>
+        <p>Already have an account? <a href="#" onclick="showSection('login')">Log In</a></p>
+    </div>
+
+    <!-- Forgot Password Page -->
+    <div id="forgot_password" class="section">
+        <button class="back-button" onclick="showSection('register')">Back</button>
+        <h2>Reset Password</h2>
+        <form action="/reset_password" method="POST">
+            <label for="new_password">New Password:</label><br>
+            <input type="password" id="new_password" name="new_password" required>
+            <span id="toggle-password-reset" class="toggle-password" onclick="togglePasswordVisibility('new_password', 'toggle-password-reset')">👁️</span>
+            <br><br>
+
+            <label for="confirm_password">Confirm New Password:</label><br>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+            <span id="toggle-password-confirm" class="toggle-password" onclick="togglePasswordVisibility('confirm_password', 'toggle-password-confirm')">👁️</span>
+            <br><br>
+
+            <input type="submit" value="Reset Password">
+        </form>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login" class="section">
+        <button class="back-button" onclick="showSection('register')">Back</button>
+        <h2>Log In</h2>
+        <form onsubmit="storeLoginDetails(); return false;">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username_login" name="username" required><br><br>
+
+            <label for="password">Password:</label><br>
+            <input type="password" id="password_login" name="password" required>
+            <span id="toggle-password-login" class="toggle-password" onclick="togglePasswordVisibility('password_login', 'toggle-password-login')">👁️</span>
+            <br><br>
+
+            <input type="submit" value="Log In">
+        </form>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile" class="section">
+        <button class="back-button" onclick="showSection('login')">Back</button>
+        <h2>Profile Details</h2>
+        <p><strong>Username:</strong> <span id="profile_username"></span></p>
+        <p><strong>Full Name:</strong> <span id="profile_name"></span></p>
+        <p><strong>Age:</strong> <span id="profile_age"></span></p>
+        <p><strong>Date of Birth:</strong> <span id="profile_dob"></span></p>
+        <p><strong>Phone Number:</strong> <span id="profile_phone"></span></p>
+        <p><strong>Address:</strong> <span id="profile_address"></span></p>
+        <button class="logout-button" onclick="logout()">Logout</button>
+    </div>
+</body>
+</html>
